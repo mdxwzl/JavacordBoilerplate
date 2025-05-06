@@ -8,15 +8,18 @@ import org.javacord.api.listener.GloballyAttachableListener
 import tech.mdxwzl.listeners.SlashCommandListener
 import tech.mdxwzl.utils.LogSuccess
 import org.reflections8.Reflections
+import tech.mdxwzl.annotations.ContextMenuType
+import tech.mdxwzl.annotations.LoadContextMenu
 import tech.mdxwzl.annotations.LoadListener
 import tech.mdxwzl.annotations.LoadSlashCommand
+import tech.mdxwzl.listeners.ContextMenuListener
 import tech.mdxwzl.utils.LogError
 
 class Client(token: String) {
+    val serverOverwrite = dotenv().get("SERVER_OVERWRITE")
     lateinit var discordApi: DiscordApi
     lateinit var slashCommandListener: SlashCommandListener
-
-    val commands = mutableSetOf<ApplicationCommandBuilder<*, *, *>>()
+    lateinit var contextMenuListener: ContextMenuListener
 
     init {
         instance = this
@@ -38,53 +41,41 @@ class Client(token: String) {
 
     private fun addListeners() {
         slashCommandListener = SlashCommandListener()
+        contextMenuListener = ContextMenuListener()
     }
 
     fun registerSlashCommands(path: String) {
-        val reflections = Reflections(path)
+        val slashCommands = Reflections(path).getTypesAnnotatedWith(LoadSlashCommand::class.java)
 
-        for (handler in reflections.getTypesAnnotatedWith(LoadSlashCommand::class.java)) {
+        for (handler in slashCommands) {
             try {
-                commands.add(slashCommandListener.addSlashCommand(handler))
+                slashCommandListener.addSlashCommand(handler)
             } catch (exception: InstantiationException) {
                 exception.printStackTrace()
             } catch (exception: IllegalAccessException) {
                 exception.printStackTrace()
             }
         }
-
-        val serverOverwrite = dotenv().get("SERVER_OVERWRITE")
-
-        if (serverOverwrite == "") {
-            overwriteGlobalCommands()
-            return;
-        }
-
-        overwriteServerCommands(serverOverwrite.toLong())
     }
 
-    private fun overwriteGlobalCommands() {
-        discordApi.bulkOverwriteGlobalApplicationCommands(commands).thenAccept { command ->
-            println("$LogSuccess Overwrote ${command.size} global commands")
-        }.exceptionally { exception ->
-            println("Failed to overwrite global commands: ${exception.message}")
-            null
-        }
-    }
+    fun registerContextMenus(path: String) {
+        val contextMenus = Reflections(path).getTypesAnnotatedWith(LoadContextMenu::class.java)
 
-    private fun overwriteServerCommands(serverId: Long) {
-        val server = discordApi.getServerById(serverId).orElse(null)
-
-        if (server == null) {
-            println("$LogError Server($serverId) not found")
-            return
-        }
-
-        discordApi.bulkOverwriteServerApplicationCommands(server, commands).thenAccept { command ->
-            println("$LogSuccess Overwrote server commands for \"${server.name}\" with ${command.size} commands")
-        }.exceptionally { exception ->
-            println("Failed to overwrite server commands: ${exception.message}")
-            null
+        for (handler in contextMenus) {
+            try {
+                val type = handler.getAnnotation(LoadContextMenu::class.java).type
+                if (type == ContextMenuType.USER) {
+                    contextMenuListener.addUserContextMenu(handler)
+                } else if (type == ContextMenuType.MESSAGE) {
+                    contextMenuListener.addMessageContextMenu(handler)
+                } else {
+                    println("$LogError Context Menu Type not found")
+                }
+            } catch (exception: InstantiationException) {
+                exception.printStackTrace()
+            } catch (exception: IllegalAccessException) {
+                exception.printStackTrace()
+            }
         }
     }
 

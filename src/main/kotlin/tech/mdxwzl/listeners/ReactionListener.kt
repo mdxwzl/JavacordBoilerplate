@@ -3,6 +3,7 @@ package tech.mdxwzl.listeners
 import org.javacord.api.event.message.reaction.ReactionAddEvent
 import org.javacord.api.listener.message.reaction.ReactionAddListener
 import tech.mdxwzl.annotations.LoadListener
+import tech.mdxwzl.utils.log
 
 @LoadListener
 class ReactionListener: ReactionAddListener {
@@ -10,7 +11,6 @@ class ReactionListener: ReactionAddListener {
         if (event.userId == event.api.yourself.id) return
 
         event.requestMessage().join().addReaction("💀").join()
-        println("Reaction added by ${event.userId}")
-
+        log("Reaction added by ${event.userId}")
     }
 }

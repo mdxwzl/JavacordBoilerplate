@@ -2,11 +2,17 @@ import org.gradle.api.JavaVersion.VERSION_17
 
 plugins {
     kotlin("jvm") version "2.0.20"
+    id("com.gradleup.shadow") version "8.3.6"
+    application
 }
 
 val mainClass = "tech.mdxwzl.MainKt"
 group = mainClass.substringBeforeLast(".")
 version = "1.0-SNAPSHOT"
+
+application {
+    mainClass = "tech.mdxwzl.MainKt"
+}
 
 repositories {
     mavenCentral()
@@ -17,6 +23,7 @@ dependencies {
     implementation("org.javacord:javacord:3.8.0")
     implementation("net.oneandone.reflections8:reflections8:0.11.5")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
 }
 
 java {
@@ -27,16 +34,6 @@ java {
 
 tasks.test {
     useJUnit()
-}
-
-tasks.withType<Jar> {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes["Main-Class"] = mainClass
-    }
-    configurations["compileClasspath"].forEach { file: File ->
-        from(zipTree(file.absoluteFile))
-    }
 }
 
 kotlin {

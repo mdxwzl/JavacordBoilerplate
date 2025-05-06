@@ -12,6 +12,7 @@ import tech.mdxwzl.interfaces.HasOptions
 )
 class Repeat: HasOptions {
     override fun perform(event: SlashCommandCreateEvent): Unit = with(event.slashCommandInteraction){
+        log("Repeat command executed by ${user.id}")
         createImmediateResponder()
             .setContent(options[0].stringValue.get())
             .respond()

@@ -7,7 +7,7 @@
     import tech.mdxwzl.annotations.LoadSlashCommand
     import tech.mdxwzl.interfaces.HasOptions
     import tech.mdxwzl.interfaces.ISlashCommand
-    import tech.mdxwzl.utils.LogError
+    import tech.mdxwzl.utils.LogInfo
     import tech.mdxwzl.utils.LogSuccess
 
     class SlashCommandListener: SlashCommandCreateListener {
@@ -16,7 +16,7 @@
 
         init {
             discordApi.addSlashCommandCreateListener(this)
-            println("$LogSuccess Listening for slash commands")
+            println("$LogInfo Listening for slash commands")
         }
 
         override fun onSlashCommandCreate(event: SlashCommandCreateEvent): Unit = with(event.slashCommandInteraction) {
@@ -56,19 +56,12 @@
                 }
             }
 
-            if (Client.instance.serverOverwrite == "") {
+            if (Client.instance.server == null) {
                 builder.createGlobal(discordApi).join()
-                println("$LogSuccess Registered slash command \"$name\" (global)")
+                println("$LogInfo Registered slash command \"$name\" (global)")
             }else {
-                val server = discordApi.getServerById(Client.instance.serverOverwrite).orElse(null)
-
-                if (server == null) {
-                    println("$LogError Server(${Client.instance.serverOverwrite}) not found")
-                    return
-                }
-
-                builder.createForServer(server).join()
-                println("$LogSuccess Registered slash command \"$name\" (${server.name})")
+                builder.createForServer(Client.instance.server).join()
+                println("$LogInfo Registered slash command \"$name\" (${Client.instance.server.name})")
             }
         }
     }

@@ -8,35 +8,42 @@ A simple boilerplate for Discord bots using Javacord and Kotlin. This project pr
   - ⚡ Slash commands
   - 🎯 Message & user Context menus
   - 👂 Event listeners of any kind
+- 📜 Logging functions to easily track events
 - ⚙️ Simple configuration via .env file
 
 ## 📋 Prerequisites
 
 - ☕ Java 17 or higher
-- 🛠️ Gradle
 - 🤖 Discord Bot Application
 
 ## 🔧 Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/JavacordBoilerplate.git
+git clone https://github.com/mdxwzl/JavacordBoilerplate.git
 ```
 
-2. Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
+2. Build the project (will generate a jar in build/libs/):
+```cmd
+cd JavacordBoilerplate
+gradlew.bat shadowJar
 ```
 
-3. Add your Discord Bot Token to `.env`:
+3. Copy `.env.example` to `build/libs/.env`:
+```cmd
+cp .env.example build/libs/.env
+```
+
+4. Add your Discord Bot Token to `.env`:
 ```
 DISCORD_TOKEN=your_discord_bot_token
 SERVER_OVERWRITE=your_server_id  # Optional: Register commands and contexts only in this server
 ```
 
-4. Build the project:
-```bash
-./gradlew build
+5. Run the bot:
+```cmd
+cd build/libs
+java -jar JavacordBoilerplate...jar
 ```
 
 ## 📝 Usage
@@ -65,7 +72,8 @@ Simple Command without Options:
     description = "Check if the bot is alive"
 )
 class Ping: ISlashCommand {
-    override fun perform(event: SlashCommandCreateEvent): Unit = with(event.slashCommandInteraction) {
+    override fun perform(event: SlashCommandCreateEvent): Unit = with(event.slashCommandInteraction) { 
+        log("Ping command executed by ${user.id}")
         createImmediateResponder()
             .setContent("Pong!")
             .respond()
@@ -82,9 +90,10 @@ Command with Options:
 )
 class Repeat: HasOptions {
     override fun perform(event: SlashCommandCreateEvent): Unit = with(event.slashCommandInteraction) {
-        createImmediateResponder()
-            .setContent(options[0].stringValue.get())
-            .respond()
+      log("Repeat command executed by ${user.id}")
+      createImmediateResponder()
+        .setContent(options[0].stringValue.get())
+        .respond()
     }
 
     override fun getOptions(): List<SlashCommandOption> {
@@ -103,18 +112,19 @@ Message Context Menu:
 ```kotlin
 @LoadContextMenu(
     name = "greet",
-    type = ContextMenuType.MESSAGE,            // Or ContextMenuType.USER
+    type = ContextMenuType.USER,            // Or ContextMenuType.MESSAGE
     permission = PermissionType.MANAGE_MESSAGES, // Optional: Required permission
     enabledInDms = true                        // Optional: Whether the menu is available in DMs
 )
-class Greet: IMessageContextMenu {
-    override fun perform(event: MessageContextMenuCommandEvent): Unit = with(event.messageContextMenuInteraction) {
-        event.api.getUserById(user.id).thenAccept { user ->
-            createImmediateResponder()
-                .setContent("Howdy ${user.name}!")
-                .respond()
-        }
+class Greet: IUserContextMenu {
+  override fun perform(event: UserContextMenuCommandEvent): Unit = with(event.userContextMenuInteraction) {
+    log("Greet command executed by ${user.id} for ${target.id}")
+    event.api.getUserById(user.id).thenAccept { user ->
+      createImmediateResponder()
+        .setContent("Howdy ${target.mentionTag}!")
+        .respond()
     }
+  }
 }
 ```
 
@@ -123,11 +133,15 @@ class Greet: IMessageContextMenu {
 Create a new class in `src/main/kotlin/tech/mdxwzl/listeners/`:
 
 ```kotlin
+...
+import tech.mdxwzl.utils.log
+
 @LoadListener
-class ReactionListener: ReactionAddListener {  // or any other listener type
-    override fun onReactionAdd(event: ReactionAddEvent) {
-        // Your logic here
-    }
+class ReactionListener: ReactionAddListener { // or any other listener type
+  override fun onReactionAdd(event: ReactionAddEvent) {
+    // Your logic here
+    log("Reaction added by ${event.userId}")
+  }
 }
 ```
 
@@ -136,23 +150,40 @@ class ReactionListener: ReactionAddListener {  // or any other listener type
 ```
 src/main/kotlin/tech/mdxwzl/
 ├── annotations/                 # Annotations for commands and events
-│   ├── LoadSlashCommand.kt
 │   ├── LoadContextMenu.kt
 │   └── LoadListener.kt
+│   ├── LoadSlashCommand.kt
 ├── commands/                    # Slash commands
 ├── contexts/                    # Context menus
 ├── enums/                       # Enums and constants
 │   └── ContextMenuType.kt
 ├── interfaces/                  # Interface definitions
-│   ├── ISlashCommand.kt
+│   ├── HasOptions.kt
+│   ├── IContextMenu.kt
 │   ├── IMessageContextMenu.kt
+│   ├── ISlashCommand.kt
 │   └── IUserContextMenu.kt
 ├── listeners/                   # Event listeners
 │   ├── SlashCommandListener.kt  
 │   ├── ContextMenuListener.kt   
 ├── utils/                       # Utility functions
+│   ├── Colors.kit
+│   ├── Logs.kit
 ├── Client.kt                    # Main Discord client class
 └── Main.kt                      # Application entry point
+```
+
+## ⌨️ Logging
+Each slash command, context menu and event listener has it's own logging function.
+It will include crucial details from the origin of the call.
+For listeners, it has to be imported from the `tech.mdxwzl.utils` package.
+
+The output will look like this:
+```
+[LOG] [COMMAND - ping] Ping command executed by 337576581406916631
+[LOG] [COMMAND - repeat] Repeat command executed by 337576581406916631
+[LOG] [CONTEXT - greet] Greet command executed by 337576581406916631 for 1313706513923182703
+[LOG] [EVENT - ReactionListener] Reaction added by 337576581406916631
 ```
 
 ## 🤝 Contributing

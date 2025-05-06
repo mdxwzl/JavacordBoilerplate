@@ -1,9 +1,6 @@
 package tech.mdxwzl.utils
 
 const val RESET = "\u001B[0m"
-const val LogSuccess = "\u001B[34m" + "[LOG]" + "\u001B[32m"
-const val LogError = "\u001B[34m" + "[LOG]" + "\u001B[31m"
-const val LogWarning = "\u001B[34m" + "[LOG]" + "\u001B[33m"
 
 const val BLACK = "\u001B[30m"
 const val RED = "\u001B[31m"
@@ -13,6 +10,11 @@ const val BLUE = "\u001B[34m"
 const val PURPLE = "\u001B[35m"
 const val CYAN = "\u001B[36m"
 const val WHITE = "\u001B[37m"
+
+const val LogInfo = "\u001B[34m" + "[LOG]" + WHITE
+const val LogSuccess = "\u001B[34m" + "[LOG]" + GREEN
+const val LogError = "\u001B[34m" + "[LOG]" + PURPLE
+const val LogWarning = "\u001B[34m" + "[LOG]" + YELLOW
 
 const val Background_Black = "\u001b[40m"
 const val Background_Red = "\u001b[41m"

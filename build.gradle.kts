@@ -6,12 +6,12 @@ plugins {
     application
 }
 
-val mainClass = "tech.mdxwzl.MainKt"
-group = mainClass.substringBeforeLast(".")
+val entrypoint = "tech.mdxwzl.MainKt"
+group = entrypoint.substringBeforeLast(".")
 version = "1.0-SNAPSHOT"
 
 application {
-    mainClass = "tech.mdxwzl.MainKt"
+    mainClass = entrypoint
 }
 
 repositories {

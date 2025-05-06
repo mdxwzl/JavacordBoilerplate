@@ -16,7 +16,7 @@
 
         init {
             discordApi.addSlashCommandCreateListener(this)
-            println("$LogSuccess Listening for Slash Commands")
+            println("$LogSuccess Listening for slash commands")
         }
 
         override fun onSlashCommandCreate(event: SlashCommandCreateEvent): Unit = with(event.slashCommandInteraction) {
@@ -58,7 +58,7 @@
 
             if (Client.instance.serverOverwrite == "") {
                 builder.createGlobal(discordApi).join()
-                println("$LogSuccess Registered Slash Command \"$name\" (Global)")
+                println("$LogSuccess Registered slash command \"$name\" (global)")
             }else {
                 val server = discordApi.getServerById(Client.instance.serverOverwrite).orElse(null)
 
@@ -68,7 +68,7 @@
                 }
 
                 builder.createForServer(server).join()
-                println("$LogSuccess Registered Slash Command \"$name\" (${server.name})")
+                println("$LogSuccess Registered slash command \"$name\" (${server.name})")
             }
         }
     }

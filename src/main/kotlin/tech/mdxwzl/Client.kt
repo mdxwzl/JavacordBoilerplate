@@ -8,14 +8,15 @@ import org.javacord.api.listener.GloballyAttachableListener
 import tech.mdxwzl.listeners.SlashCommandListener
 import tech.mdxwzl.utils.LogSuccess
 import org.reflections8.Reflections
-import tech.mdxwzl.annotations.ContextMenuType
 import tech.mdxwzl.annotations.LoadContextMenu
 import tech.mdxwzl.annotations.LoadListener
 import tech.mdxwzl.annotations.LoadSlashCommand
+import tech.mdxwzl.enums.ContextMenuType
 import tech.mdxwzl.listeners.ContextMenuListener
 import tech.mdxwzl.utils.LogError
 
-class Client(token: String) {
+class Client() {
+    val token = dotenv().get("DISCORD_TOKEN") ?: error("DISCORD_TOKEN not found in .env")
     val serverOverwrite = dotenv().get("SERVER_OVERWRITE")
     lateinit var discordApi: DiscordApi
     lateinit var slashCommandListener: SlashCommandListener
@@ -39,6 +40,11 @@ class Client(token: String) {
         return discordApi
     }
 
+    fun logout() {
+        discordApi.disconnect()
+        println("$LogSuccess Successfully logged out")
+    }
+
     private fun addListeners() {
         slashCommandListener = SlashCommandListener()
         contextMenuListener = ContextMenuListener()
@@ -47,43 +53,29 @@ class Client(token: String) {
     fun registerSlashCommands(path: String) {
         val slashCommands = Reflections(path).getTypesAnnotatedWith(LoadSlashCommand::class.java)
 
-        for (handler in slashCommands) {
-            try {
-                slashCommandListener.addSlashCommand(handler)
-            } catch (exception: InstantiationException) {
-                exception.printStackTrace()
-            } catch (exception: IllegalAccessException) {
-                exception.printStackTrace()
-            }
+        for (slashCommand in slashCommands) {
+            slashCommandListener.addSlashCommand(slashCommand)
         }
     }
 
     fun registerContextMenus(path: String) {
         val contextMenus = Reflections(path).getTypesAnnotatedWith(LoadContextMenu::class.java)
 
-        for (handler in contextMenus) {
-            try {
-                val type = handler.getAnnotation(LoadContextMenu::class.java).type
-                if (type == ContextMenuType.USER) {
-                    contextMenuListener.addUserContextMenu(handler)
-                } else if (type == ContextMenuType.MESSAGE) {
-                    contextMenuListener.addMessageContextMenu(handler)
-                } else {
-                    println("$LogError Context Menu Type not found")
-                }
-            } catch (exception: InstantiationException) {
-                exception.printStackTrace()
-            } catch (exception: IllegalAccessException) {
-                exception.printStackTrace()
+        for (context in contextMenus) {
+            val type = context.getAnnotation(LoadContextMenu::class.java).type
+            when (type) {
+                ContextMenuType.USER -> contextMenuListener.addUserContextMenu(context)
+                ContextMenuType.MESSAGE -> contextMenuListener.addMessageContextMenu(context)
+                else -> println("$LogError Context Menu Type not found")
             }
         }
     }
 
     fun registerListeners(path: String) {
         val listeners = Reflections(path).getTypesAnnotatedWith(LoadListener::class.java)
-        for(clazz in listeners) {
-            discordApi.addListener(clazz.getDeclaredConstructor().newInstance() as GloballyAttachableListener)
-            println("${LogSuccess} Registered Listener \"${clazz.name.split(".").last()}\"")
+        for (listener in listeners) {
+            discordApi.addListener(listener.getDeclaredConstructor().newInstance() as GloballyAttachableListener)
+            println("${LogSuccess} Registered Listener \"${listener.name.split(".").last()}\"")
         }
 
         println("$LogSuccess Successfully loaded ${listeners.size} Listeners")

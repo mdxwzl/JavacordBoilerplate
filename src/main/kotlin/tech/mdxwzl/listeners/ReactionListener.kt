@@ -5,7 +5,7 @@ import org.javacord.api.listener.message.reaction.ReactionAddListener
 import tech.mdxwzl.annotations.LoadListener
 
 @LoadListener
-class Reaction: ReactionAddListener {
+class ReactionListener: ReactionAddListener {
     override fun onReactionAdd(event: ReactionAddEvent) {
         if (event.userId == event.api.yourself.id) return
 

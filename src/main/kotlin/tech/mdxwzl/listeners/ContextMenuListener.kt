@@ -7,9 +7,7 @@ import org.javacord.api.interaction.UserContextMenuBuilder
 import org.javacord.api.listener.interaction.MessageContextMenuCommandListener
 import org.javacord.api.listener.interaction.UserContextMenuCommandListener
 import tech.mdxwzl.Client
-import tech.mdxwzl.annotations.ContextMenuType
 import tech.mdxwzl.annotations.LoadContextMenu
-import tech.mdxwzl.annotations.LoadSlashCommand
 import tech.mdxwzl.interfaces.IMessageContextMenu
 import tech.mdxwzl.interfaces.IUserContextMenu
 import tech.mdxwzl.utils.LogError
@@ -23,7 +21,7 @@ class ContextMenuListener: MessageContextMenuCommandListener, UserContextMenuCom
     init {
         discordApi.addMessageContextMenuCommandListener(this)
         discordApi.addUserContextMenuCommandListener(this)
-        println("$LogSuccess Listening for User & Message Context Menus")
+        println("$LogSuccess Listening for user & message context menus")
     }
 
     fun addMessageContextMenu(handler: Class<*>) {
@@ -44,7 +42,7 @@ class ContextMenuListener: MessageContextMenuCommandListener, UserContextMenuCom
 
         if (Client.instance.serverOverwrite == "") {
             builder.createGlobal(discordApi).join()
-            println("$LogSuccess Registered Message Context Menu \"$name\" (Global)")
+            println("$LogSuccess Registered message context menu \"$name\" (Global)")
         }else {
             val server = discordApi.getServerById(Client.instance.serverOverwrite).orElse(null)
 
@@ -54,7 +52,7 @@ class ContextMenuListener: MessageContextMenuCommandListener, UserContextMenuCom
             }
 
             builder.createForServer(server).join()
-            println("$LogSuccess Registered Message Context Menu \"$name\" (${server.name})")
+            println("$LogSuccess Registered message context menu \"$name\" (${server.name})")
         }
 
     }
@@ -76,7 +74,7 @@ class ContextMenuListener: MessageContextMenuCommandListener, UserContextMenuCom
 
         if (Client.instance.serverOverwrite == "") {
             builder.createGlobal(discordApi).join()
-            println("$LogSuccess Registered User Context Menu \"$name\" (Global)")
+            println("$LogSuccess Registered user context menu \"$name\" (Global)")
         }else {
             val server = discordApi.getServerById(Client.instance.serverOverwrite).orElse(null)
 
@@ -86,7 +84,7 @@ class ContextMenuListener: MessageContextMenuCommandListener, UserContextMenuCom
             }
 
             builder.createForServer(server).join()
-            println("$LogSuccess Registered User Context Menu \"$name\" (${server.name})")
+            println("$LogSuccess Registered user context menu \"$name\" (${server.name})")
         }
     }
 

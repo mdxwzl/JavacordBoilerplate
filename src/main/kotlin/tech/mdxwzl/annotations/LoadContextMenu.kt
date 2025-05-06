@@ -1,11 +1,7 @@
 package tech.mdxwzl.annotations
 
 import org.javacord.api.entity.permission.PermissionType
-
-enum class ContextMenuType{
-    MESSAGE(),
-    USER()
-}
+import tech.mdxwzl.enums.ContextMenuType
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
